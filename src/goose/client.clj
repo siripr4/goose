@@ -101,19 +101,26 @@
   [jobs]
   (let [batch-meta (:batch-id (str (random-uuid)))]
     (doseq [{:keys [opts execute-fn-sym args]} jobs]
-      (enqueue (assoc opts :batch batch-meta) nil execute-fn-sym args))))
+      (enqueue (assoc opts :batch batch-meta) nil execute-fn-sym args))
+    (:batch-id batch-meta)))
 
 (defn perform-batch-defer
   "Enqueue n jobs which are not ready for execution"
   [jobs]
-  (let [batch-meta (:batch-id (str (random-uuid)))]
+  (let [batch-meta (assoc {} :batch-id (str (random-uuid)))]
     (doseq [{:keys [opts execute-fn-sym args]} jobs]
-      (enqueue-wait (assoc opts :batch batch-meta) execute-fn-sym args))))
+      (enqueue-wait (assoc opts :batch batch-meta) execute-fn-sym args))
+    (:batch-id batch-meta)))
 
 (defn add-jobs-to-batch
   "Add jobs to existing batch"
   [batch-id jobs]
-  ())
+  (doseq [{:keys [opts execute-fn-sym args]} jobs]
+    (enqueue-wait
+      ; TODO: replace `:batch (assoc {} :batch-id batch-id)` with the batch entire metadata
+      (assoc opts :batch (assoc {} :batch-id batch-id))
+      execute-fn-sym
+      args)))
 
 (defn perform-async
   "Enqueues a function for async execution.

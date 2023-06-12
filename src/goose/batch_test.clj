@@ -21,9 +21,19 @@
                   :execute-fn-sym `prn
                   :args           ["qwe" "xyz"]}])
 
-(client/perform-batch-defer test-batch)
+(def additional-jobs [{:opts           test-opts
+                       :execute-fn-sym `prn
+                       :args           ["add_job_1" "1"]}
+                      {:opts           test-opts
+                       :execute-fn-sym `prn
+                       :args           ["add_job_2" "2"]}
+                      {:opts           test-opts
+                       :execute-fn-sym `prn
+                       :args           ["add_job_3" "3"]}])
 
-
+(let [batch-id (client/perform-batch-defer test-batch)]
+  (client/add-jobs-to-batch batch-id additional-jobs))
+(client/perform-batch test-batch)
 
 (comment
   (:storage-locations
