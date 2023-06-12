@@ -11,6 +11,9 @@
   (schedule [this schedule-epoch-ms job] "Schedules a Job for execution at given epoch-ms.")
   (register-cron [this cron-opts job-description] "Registers a function for periodic execution in cron-jobs style.")
 
+  (enqueue-wait [this job] "Enqueues a Job that is not ready for execution.")
+  (mark-ready-for-execution [this job] "Marks a job that is in the wait queue as ready to execute")
+
   ;; worker/consumer
   (start-worker [this worker-opts] "Starts a worker process that does multiple things:
   - Dequeue & execute jobs from given queue

@@ -12,6 +12,9 @@
     [goose.defaults :as d]
     [goose.specs :as specs]))
 
+(defn- wait-area [{:keys [queue]}]
+  (d/prefix-queue (str queue ":wait-area")))
+
 (defrecord Redis [redis-conn opts]
   b/Broker
   (enqueue
@@ -24,6 +27,12 @@
     (cron/register (:redis-conn this) cron-opts job-description))
   (start-worker [this worker-opts]
     (redis-worker/start (merge worker-opts (:opts this))))
+  (enqueue-wait
+    [this job]
+    (redis-cmds/set-in-hashset (:redis-conn this) (wait-area job) (:id job) job))
+  (mark-ready-for-execution [this job]
+    (redis-cmds/set-in-hashset (:redis-conn this) (wait-area job) "foo" "bar"))
+
 
   ;; enqueued-jobs API
   (enqueued-jobs-list-all-queues [this]

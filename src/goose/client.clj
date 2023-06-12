@@ -50,6 +50,28 @@
       (b/schedule broker schedule-epoch-ms job)
       (b/enqueue broker job))))
 
+(defn init-batch
+  [jobs]
+  ())
+
+(defn- enqueue-batch
+  [opts jobs]
+  ()
+  (map
+    (fn [{:keys [execute-fn-sym args]}])
+    jobs))
+
+(defn enqueue-wait-test
+  [{:keys [broker queue retry-opts]}
+   execute-fn-sym
+   args]
+  (let [job (j/new execute-fn-sym args queue (d/prefix-queue queue) retry-opts)]
+    (b/enqueue-wait broker job)
+    (b/mark-ready-for-execution broker job)))
+
+
+
+
 (defn perform-async
   "Enqueues a function for async execution.
 

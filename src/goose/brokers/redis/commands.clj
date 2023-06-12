@@ -52,9 +52,9 @@
   [conn f]
   (let [return-value (atom nil)]
     (car/atomic conn atomic-lock-attempts
-      ;; This ugliness is necessary because car/atomic does not
-      ;; return the value of the last expression inside it.
-      (reset! return-value (f)))
+                ;; This ugliness is necessary because car/atomic does not
+                ;; return the value of the last expression inside it.
+                (reset! return-value (f)))
     @return-value))
 
 (defmacro with-transaction
@@ -73,6 +73,14 @@
 
 (defn del-keys [conn keys]
   (wcar* conn (apply car/del keys)))
+
+;;; ============== Hash Sets ===============
+
+(defn get-from-hashset [conn hashset field]
+  (wcar* conn (car/hget hashset field)))
+
+(defn set-in-hashset [conn hashset field value]
+  (wcar* conn (car/hset hashset field value)))
 
 ;;; ============== Sets ===============
 (defn add-to-set [conn set member]
@@ -107,8 +115,8 @@
 (defn find-in-set
   [conn set match?]
   (->> (set-seq conn set)
-       (filter match?)
-       (doall)))
+    (filter match?)
+    (doall)))
 
 ;;; ============== Lists ===============
 ;;; ===== FRONT/BACK -> RIGHT/LEFT =====
@@ -167,16 +175,16 @@
                   ;; and the front of a queue is the right side (the tail).
                   (let [next-cursor (dec cursor)
                         elements (wcar* conn
-                                   (car/lrange redis-key (dec cursor) (dec cursor)))]
+                                        (car/lrange redis-key (dec cursor) (dec cursor)))]
                     [next-cursor elements]))]
     (scan-seq conn scan-fn list-key size)))
 
 (defn find-in-list
   [conn queue match? limit]
   (->> (list-seq conn queue)
-       (filter match?)
-       (take limit)
-       (doall)))
+    (filter match?)
+    (take limit)
+    (doall)))
 
 ;;; ============ Sorted-Sets ============
 (def sorted-set-min "-inf")
@@ -233,9 +241,9 @@
 (defn find-in-sorted-set
   [conn sorted-set match? limit]
   (->> (sorted-set-seq conn sorted-set)
-       (filter match?)
-       (take limit)
-       (doall)))
+    (filter match?)
+    (take limit)
+    (doall)))
 
 (defn del-from-sorted-set [conn sorted-set member]
   (wcar* conn (car/zrem sorted-set member)))

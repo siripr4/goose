@@ -10,8 +10,8 @@
    :args           args
    ;; Since ready-queue is an internal implementation detail,
    ;; we store queue as well for find-by-pattern API queries.
-   :queue          queue
-   :ready-queue    ready-queue
+   :queue          queue                                    ; "q"
+   :ready-queue    ready-queue                              ; "ready-q2"
    :retry-opts     retry-opts
    :enqueued-at    (u/epoch-time-ms)})
 
