@@ -4,7 +4,7 @@
     [goose.utils :as u]))
 
 (defn new
-  [execute-fn-sym args queue ready-queue retry-opts]
+  [execute-fn-sym args queue ready-queue retry-opts batch]
   {:id             (str (random-uuid))
    :execute-fn-sym execute-fn-sym
    :args           args
@@ -13,7 +13,8 @@
    :queue          queue                                    ; "q"
    :ready-queue    ready-queue                              ; "ready-q2"
    :retry-opts     retry-opts
-   :enqueued-at    (u/epoch-time-ms)})
+   :enqueued-at    (u/epoch-time-ms)
+   :batch          batch})
 
 (defn ready-queue
   [job]

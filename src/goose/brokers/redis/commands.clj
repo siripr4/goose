@@ -213,6 +213,7 @@
       (apply car/rpush queue jobs))
     (apply car/zrem sorted-set jobs)))
 
+
 (defn sorted-set-score [conn sorted-set element]
   (wcar* conn (car/zscore sorted-set element)))
 

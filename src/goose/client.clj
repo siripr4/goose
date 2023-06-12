@@ -38,39 +38,82 @@
     (select-keys cron-entry [:cron-name :cron-schedule :timezone])))
 
 (defn- enqueue
-  [{:keys [broker queue retry-opts]}
+  [{:keys [broker queue retry-opts batch]}
    schedule-epoch-ms
    execute-fn-sym
    args]
   (let [retry-opts (retry/prefix-queue-if-present retry-opts)
         ready-queue (d/prefix-queue queue)
-        job (j/new execute-fn-sym args queue ready-queue retry-opts)]
+        job (j/new execute-fn-sym args queue ready-queue retry-opts batch)]
 
     (if schedule-epoch-ms
       (b/schedule broker schedule-epoch-ms job)
       (b/enqueue broker job))))
 
-(defn init-batch
-  [jobs]
-  ())
-
-(defn- enqueue-batch
-  [opts jobs]
-  ()
-  (map
-    (fn [{:keys [execute-fn-sym args]}])
-    jobs))
-
-(defn enqueue-wait-test
-  [{:keys [broker queue retry-opts]}
+(defn- enqueue-wait
+  [{:keys [broker queue retry-opts batch]}
    execute-fn-sym
    args]
-  (let [job (j/new execute-fn-sym args queue (d/prefix-queue queue) retry-opts)]
-    (b/enqueue-wait broker job)
-    (b/mark-ready-for-execution broker job)))
+  (let [retry-opts (retry/prefix-queue-if-present retry-opts)
+        ready-queue (d/prefix-queue queue)
+        job (j/new execute-fn-sym args queue ready-queue retry-opts batch)]
+    (b/enqueue-wait broker job)))
 
+(comment
+  "1. fn to enqueue n sub jobs and execute them immediately"
+  "2. fn to enqueue-wait n sub jobs"
+  "3. `add-jobs-to-batch` - fn to add sub jobs to existing batch"
+  "4. `mark-batch-ready` - fn move jobs with batch-id from wait-area to ready-queue")
 
+(comment " - split init job into
+         - `create-batch `
+                 - create a batch job, add it to `:wait-queue `
+                 - `exec-fn-sym ` of batch job
+         - move all sub jobs from `:wait-queue ` to `:ready-queue `
+                 - or sub-jobs are created on `:ready-queue ` directly
+         - `add-jobs-to-batch `
+                 - check batch state
+         - `created? ` - add jobs
+         - `ready-for-exec? ` - don't add jobs, return error
+         - `mark-batch-ready `
+                 - batch-status -> `:ready-for-exec`")
 
+(comment (defn init-batch
+           [jobs]
+           ()))
+
+(comment (defn- enqueue-batch
+           [opts jobs]
+           (map
+             (fn [{:keys [execute-fn-sym args]}])
+             jobs)))
+
+(comment (defn enqueue-wait-test
+           [{:keys [broker queue retry-opts]}
+            execute-fn-sym
+            args]
+           (let [job (j/new execute-fn-sym args queue (d/prefix-queue queue) retry-opts)]
+             (b/enqueue-wait broker job)
+             (b/mark-ready-for-execution broker job))))
+
+(defn perform-batch
+  "Enqueue n jobs for execution"
+  [jobs]
+  (let [batch-meta (:batch-id (str (random-uuid)))]
+    (doseq [{:keys [opts execute-fn-sym args]} jobs]
+      (enqueue (assoc opts :batch batch-meta) nil execute-fn-sym args))))
+
+(defn perform-batch-defer
+  "Enqueue n jobs which are not ready for execution"
+  [jobs]
+  (let [batch-meta (:batch-id (str (random-uuid)))]
+    (doseq [{:keys [opts execute-fn-sym args]} jobs]
+      (enqueue-wait (assoc opts :batch batch-meta) execute-fn-sym args))))
+
+(defn add-jobs-to-batch
+  "Add jobs to existing batch"
+  [batch-id jobs]
+  ())
 
 (defn perform-async
   "Enqueues a function for async execution.
