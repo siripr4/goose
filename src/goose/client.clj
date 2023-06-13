@@ -118,9 +118,14 @@
   (doseq [{:keys [opts execute-fn-sym args]} jobs]
     (enqueue-wait
       ; TODO: replace `:batch (assoc {} :batch-id batch-id)` with the batch entire metadata
+      ; TODO: check if batch is ready-for-execution?
       (assoc opts :batch (assoc {} :batch-id batch-id))
       execute-fn-sym
       args)))
+
+(defn mark-batch-ready-for-execution
+  "Mark a batch of jobs ready for execution. No more jobs can be added to the batch."
+  [batch-id])
 
 (defn perform-async
   "Enqueues a function for async execution.

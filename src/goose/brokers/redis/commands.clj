@@ -213,6 +213,23 @@
       (apply car/rpush queue jobs))
     (apply car/zrem sorted-set jobs)))
 
+(defn hashset->ready-queue
+  [conn hashset jobs grouping-fn]
+  (car/atomic
+    conn atomic-lock-attempts
+    (car/multi)
+    (doseq [[queue ready-jobs] (group-by grouping-fn (vals jobs))]
+      (apply car/rpush queue ready-jobs))
+      (apply #(car/hdel hashset (keys %)) jobs)))
+
+(defn hashset->ready-queue
+  [conn hashset field value]
+  (car/atomic
+    conn atomic-lock-attempts
+    (car/multi)
+    (car/rpush (:ready-queue value) value)
+    (car/hdel hashset field)))
+
 
 (defn sorted-set-score [conn sorted-set element]
   (wcar* conn (car/zscore sorted-set element)))
