@@ -9,6 +9,8 @@
 (defn preservation-queue [id]
   (str d/in-progress-queue-prefix id))
 
+
+(wrap-with-goose-mmiddleware [call])
 (defn run
   [{:keys [thread-pool redis-conn ready-queue in-progress-queue call]
     :as   opts}]
@@ -17,5 +19,5 @@
     thread-pool
     (u/log-on-exceptions
       (when-let [job (redis-cmds/dequeue-and-preserve redis-conn ready-queue in-progress-queue)]
-        (call opts job)
+        (wrap-with-goose-mmiddleware (call)  opts job)
         (redis-cmds/del-from-list redis-conn in-progress-queue job)))))

@@ -47,10 +47,13 @@
   (let [call (if middlewares
                (-> consumer/execute-job (middlewares))
                consumer/execute-job)]
-    (-> call
+    #_(-> middleawre1
+        call
         (m/wrap-metrics)
         (job/wrap-latency)
-        (redis-retry/wrap-failure))))
+        middleware2
+        (redis-retry/wrap-failure)
+        )))
 
 (defn start
   [{:keys [threads queue middlewares pool-opts url] :as common-opts}]
@@ -68,7 +71,7 @@
                     :redis-conn           redis-conn
                     :thread-pool          thread-pool
                     :internal-thread-pool internal-thread-pool
-                    :call                 (chain-middlewares middlewares)
+                    :call                 (chain-middlewares user-provided-middlewares)
 
                     :process-set          (str d/process-prefix queue)
                     :ready-queue          (d/prefix-queue queue)

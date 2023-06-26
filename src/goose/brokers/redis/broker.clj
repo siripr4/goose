@@ -30,6 +30,7 @@
   (enqueue-wait
     [this job]
     (redis-cmds/set-in-hashset (:redis-conn this) (wait-area job) (:id job) job))
+
   (mark-ready-for-execution [this job]
     (redis-cmds/set-in-hashset (:redis-conn this) (wait-area job) "foo" "bar"))
   (mark-batch-ready-for-execution [this batch-id]

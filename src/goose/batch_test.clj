@@ -11,8 +11,8 @@
                                    [1 2 3]))
 (def test-redis-producer (redis/new-producer redis/default-opts))
 (def test-opts (assoc client/default-opts :broker test-redis-producer))
-(def test-batch [{:opts           test-opts
-                  :execute-fn-sym `prn
+(def test-batch [{:opts           test-opts                 ; goose opts
+                  :execute-fn-sym `prn                      ;
                   :args           ["foo" "bar"]}
                  {:opts           test-opts
                   :execute-fn-sym `prn

@@ -123,9 +123,20 @@
       execute-fn-sym
       args)))
 
+(comment
+  "1. wait for all jobs"
+  "2. wait for a batch"
+    - "don't pass a symbol"
+    - "if it's a batch")
+
 (defn mark-batch-ready-for-execution
   "Mark a batch of jobs ready for execution. No more jobs can be added to the batch."
-  [batch-id])
+  [batch-id]
+  ; find all jobs associated with the batch-id
+  ; wait-area->ready-queue these jobs
+  ;   - group jobs of same wait-area
+  ;   - hashset->ready-queue
+  )
 
 (defn perform-async
   "Enqueues a function for async execution.

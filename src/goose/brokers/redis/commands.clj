@@ -222,7 +222,7 @@
       (apply car/rpush queue ready-jobs))
       (apply #(car/hdel hashset (keys %)) jobs)))
 
-(defn hashset->ready-queue
+(defn wait-area->ready-queue
   [conn hashset field value]
   (car/atomic
     conn atomic-lock-attempts
